@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Govee H617E",
+        "description": "Enter the Bluetooth MAC address of your H617E LED strip.",
+        "data": {
+          "mac": "Bluetooth MAC address",
+          "name": "Name"
+        }
+      }
+    },
+    "error": {
+      "invalid_mac": "Invalid MAC address. Expected format: AA:BB:CC:DD:EE:FF"
+    },
+    "abort": {
+      "already_configured": "This device is already configured."
+    }
+  }
+}

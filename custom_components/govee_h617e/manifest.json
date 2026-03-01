@@ -1,0 +1,12 @@
+{
+  "domain": "govee_h617e",
+  "name": "Govee H617E LED Strip",
+  "codeowners": ["@N30Z"],
+  "config_flow": true,
+  "documentation": "https://github.com/N30Z/Govee-H617E-Home-Assistant-",
+  "issue_tracker": "https://github.com/N30Z/Govee-H617E-Home-Assistant-/issues",
+  "iot_class": "local_push",
+  "requirements": ["bleak>=0.21.0"],
+  "version": "1.0.0",
+  "homeassistant": "2023.1.0"
+}
