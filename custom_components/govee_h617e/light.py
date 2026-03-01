@@ -57,7 +57,7 @@ def _pkt_color(r: int, g: int, b: int) -> bytes:
 
 
 # ---------------------------------------------------------------------------
-# Scene loader
+# Scene / custom-effect loaders
 # ---------------------------------------------------------------------------
 
 def _load_scenes() -> list[dict]:
@@ -69,6 +69,31 @@ def _load_scenes() -> list[dict]:
         return data.get("scenes", [])
     except (FileNotFoundError, json.JSONDecodeError) as err:
         _LOGGER.warning("Could not load scenes.json: %s", err)
+        return []
+
+
+def _load_custom_effects() -> list[dict]:
+    """Load user-defined multi-packet effects from custom_effects.json.
+
+    Each entry must have a "name" (str) and "packets" (list of hex strings).
+    """
+    path = os.path.join(os.path.dirname(__file__), "custom_effects.json")
+    try:
+        with open(path, encoding="utf-8") as fh:
+            data = json.load(fh)
+        effects = data.get("custom_effects", [])
+        valid = []
+        for eff in effects:
+            if eff.get("name") and eff.get("packets"):
+                valid.append(eff)
+            else:
+                _LOGGER.warning("Skipping invalid custom effect entry: %s", eff)
+        _LOGGER.debug("Loaded %d custom effect(s) from custom_effects.json", len(valid))
+        return valid
+    except FileNotFoundError:
+        return []
+    except json.JSONDecodeError as err:
+        _LOGGER.warning("Could not parse custom_effects.json: %s", err)
         return []
 
 
@@ -85,7 +110,11 @@ async def async_setup_entry(
     mac: str = entry.data[CONF_MAC]
     name: str = entry.data.get(CONF_NAME, f"Govee H617E ({mac})")
     scenes = await hass.async_add_executor_job(_load_scenes)
-    async_add_entities([GoveeH617ELight(mac, name, scenes)], update_before_add=False)
+    custom_effects = await hass.async_add_executor_job(_load_custom_effects)
+    async_add_entities(
+        [GoveeH617ELight(mac, name, scenes, custom_effects)],
+        update_before_add=False,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -100,15 +129,28 @@ class GoveeH617ELight(LightEntity):
     _attr_color_mode = ColorMode.RGB
     _attr_supported_features = LightEntityFeature.EFFECT
 
-    def __init__(self, mac: str, name: str, scenes: list[dict]) -> None:
+    def __init__(
+        self,
+        mac: str,
+        name: str,
+        scenes: list[dict],
+        custom_effects: list[dict] | None = None,
+    ) -> None:
         self._mac = mac
         self._attr_name = name
         self._attr_unique_id = mac.replace(":", "").lower()
 
         # Scene list – use the raw hex packets from scenes.json
         self._scenes: list[dict] = scenes
+
+        # Custom multi-packet effects from custom_effects.json
+        self._custom_effects: list[dict] = custom_effects or []
+
+        # Combined effect list: built-in scenes first, then custom effects
         self._attr_effect_list = [
             s["name"] for s in scenes if s.get("name")
+        ] + [
+            e["name"] for e in self._custom_effects if e.get("name")
         ]
 
         # BLE state
@@ -242,6 +284,21 @@ class GoveeH617ELight(LightEntity):
         # --- Effect (scene) ---
         if ATTR_EFFECT in kwargs:
             effect_name: str = kwargs[ATTR_EFFECT]
+
+            # 1. Check custom multi-packet effects first
+            custom = next(
+                (e for e in self._custom_effects if e.get("name") == effect_name),
+                None,
+            )
+            if custom:
+                for hex_pkt in custom["packets"]:
+                    if not await self._send(bytes.fromhex(hex_pkt)):
+                        return
+                self._attr_effect = effect_name
+                self.async_write_ha_state()
+                return
+
+            # 2. Fall back to built-in single-packet scenes
             scene = next(
                 (s for s in self._scenes if s.get("name") == effect_name),
                 None,
@@ -252,6 +309,7 @@ class GoveeH617ELight(LightEntity):
                     self._attr_effect = effect_name
                     self.async_write_ha_state()
                 return
+
             _LOGGER.warning("Unknown effect: %s", effect_name)
             return
 
