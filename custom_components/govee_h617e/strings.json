@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Govee H617E einrichten",
+        "description": "Gib die Bluetooth-MAC-Adresse deines H617E-Strips ein.",
+        "data": {
+          "mac": "Bluetooth MAC-Adresse",
+          "name": "Name"
+        }
+      }
+    },
+    "error": {
+      "invalid_mac": "Ungültige MAC-Adresse. Format: AA:BB:CC:DD:EE:FF"
+    },
+    "abort": {
+      "already_configured": "Dieses Gerät ist bereits eingerichtet."
+    }
+  }
+}
