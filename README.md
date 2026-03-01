@@ -12,6 +12,7 @@ Direkte Bluetooth-Low-Energy (BLE) Steuerung des **Govee H617E** LED-Strips in H
 | Helligkeit (0–100 %) | ✅ |
 | RGB-Farbe | ✅ |
 | Szenen / Effekte (228 Stück) | ✅ |
+| Eigene Custom Effekte (custom_effects.json) | ✅ |
 | Automatische Wiederverbindung | ✅ |
 | Konfiguration über die HA-UI | ✅ |
 | Kein Cloud-Zugriff nötig | ✅ |
@@ -40,6 +41,7 @@ Direkte Bluetooth-Low-Energy (BLE) Steuerung des **Govee H617E** LED-Strips in H
            ├── __init__.py
            ├── config_flow.py
            ├── const.py
+           ├── custom_effects.json   ← eigene Effekte hier eintragen
            ├── light.py
            ├── manifest.json
            ├── scenes.json
@@ -123,6 +125,95 @@ Beispiele:
 | Wald | Natürliches Grün |
 | Universum-A / Universum-B | Kosmische Effekte |
 | … | 222 weitere |
+
+---
+
+## Eigene Effekte (Custom Effects)
+
+Neben den 228 vorgespeicherten Szenen können eigene Effekte als **rohe BLE-Pakete** definiert werden.
+Custom Effekte unterstützen auch **Mehrfach-Pakete** (Sequenzen), die der Reihe nach gesendet werden.
+
+### Datei: `custom_effects.json`
+
+Die Datei liegt neben `scenes.json` im Integrationsordner:
+
+```
+custom_components/govee_h617e/custom_effects.json
+```
+
+### Format
+
+```json
+{
+  "custom_effects": [
+    {
+      "name": "Mein Effekt",
+      "description": "Optionale Beschreibung",
+      "packets": [
+        "33051501ffffff000000000024490000000000b0",
+        "330515016c00a5000000000049120000000000b0",
+        "330515010000ff0000000000922400000000006b"
+      ]
+    },
+    {
+      "name": "Einfacher Effekt",
+      "packets": [
+        "3305040d700000000000000000000000000000e5"
+      ]
+    }
+  ]
+}
+```
+
+**Felder:**
+
+| Feld | Typ | Pflicht | Beschreibung |
+|---|---|---|---|
+| `name` | string | ✅ | Anzeigename im HA-Effekt-Dropdown |
+| `description` | string | ❌ | Freitext-Beschreibung (wird nicht von HA genutzt) |
+| `packets` | array of strings | ✅ | Liste von Raw-BLE-Paketen als Hex-Strings (je 20 Byte = 40 Zeichen) |
+
+### Paketformat
+
+Jedes Paket ist ein 20-Byte-Hex-String mit XOR-Checksum:
+
+```
+Byte 0   : 0x33          – Govee-Prefix
+Byte 1   : 0x05          – Kommandofamilie (Farbe/Effekt)
+Byte 2   : Subkommando   – z. B. 0x15 = Custom/DIY, 0x04 = eingebaute Szene
+Byte 3   : Parameter     – z. B. Segment-Index oder Szenen-ID
+Byte 4-18: Nutzdaten     – z. B. RGB-Werte, Effektparameter, Padding
+Byte 19  : XOR-Checksum  – XOR über alle vorherigen 19 Bytes
+```
+
+### Eigene Raw-Pakete aufzeichnen
+
+Mit dem beiliegenden Standalone-Skript können eigene Pakete aufzeichnet werden:
+
+```bash
+python3 govee_h617e.py --mac AA:BB:CC:DD:EE:FF
+
+# Im interaktiven Modus:
+> raw 33051501ffffff000000000024490000000000b0   # Paket direkt senden
+> rawsave                                        # Letztes Paket speichern
+> rec start                                      # Aufzeichnung starten
+> rec stop                                       # Aufzeichnung stoppen
+> list packets                                   # Alle gespeicherten Pakete anzeigen
+```
+
+### Effekt in Home Assistant verwenden
+
+Nach dem Hinzufügen eines Eintrags in `custom_effects.json` und einem **Neustart von Home Assistant** erscheint der Effekt automatisch im Effekt-Dropdown und kann per Automatisierung verwendet werden:
+
+```yaml
+service: light.turn_on
+target:
+  entity_id: light.govee_h617e
+data:
+  effect: "Mein Effekt"
+```
+
+> **Hinweis:** Custom Effekte erscheinen **hinter** den 228 eingebauten Szenen in der Liste.
 
 ---
 

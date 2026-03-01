@@ -1,0 +1,14 @@
+{
+  "_comment": "Eigene BLE-Effekte für den Govee H617E. Jeder Effekt besteht aus einer oder mehreren Raw-BLE-Paketen (20 Byte, Hex-kodiert). Alle Pakete werden beim Aktivieren des Effekts der Reihe nach gesendet.",
+  "custom_effects": [
+    {
+      "name": "Custom: Weiß-Lila-Blau",
+      "description": "Dreifarbiger Sequenz-Effekt: Weiß → Lila → Blau",
+      "packets": [
+        "33051501ffffff000000000024490000000000b0",
+        "330515016c00a5000000000049120000000000b0",
+        "330515010000ff0000000000922400000000006b"
+      ]
+    }
+  ]
+}
