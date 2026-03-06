@@ -1,4 +1,6 @@
 {
-  "name": "Govee H617E LED Strip",
+  "name": "Govee H617E BLE",
+  "content_in_root": false,
+  "domains": ["govee_h617e"],
   "render_readme": true
 }
