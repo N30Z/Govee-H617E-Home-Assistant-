@@ -1,0 +1,7 @@
+{
+  "name": "Govee H617E BLE",
+  "content_in_root": false,
+  "domains": ["govee_h617e"],
+  "homeassistant": "2023.8.0",
+  "render_readme": true
+}
