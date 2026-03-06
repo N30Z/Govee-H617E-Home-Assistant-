@@ -53,15 +53,36 @@ Typische Stolperfallen auf Raspberry Pi:
 
 ## 5) Installation
 ### HACS (vorbereitet)
-1. Repository als Custom Repository in HACS hinzufügen.
-2. Integration installieren.
-3. Home Assistant neu starten.
-4. Integration in UI hinzufügen.
+1. In HACS: **Integrations → 3 Punkte → Custom repositories**.
+2. Repository-URL eintragen, Kategorie **Integration** wählen.
+3. Integration installieren und Home Assistant **neu starten**.
+4. Dann in **Einstellungen → Geräte & Dienste → Integration hinzufügen** nach `Govee H617E BLE` oder `govee_h617e` suchen.
+
+> Wichtig: Für HACS-Erkennung ist eine `hacs.json` im Repo enthalten. Ohne diese Datei wird ein Custom-Repo oft nicht korrekt als Integration erkannt.
 
 ### Manuell
-1. `custom_components/govee_h617e` nach `<config>/custom_components/` kopieren.
-2. Home Assistant neu starten.
-3. Integration über UI hinzufügen.
+1. Die Struktur muss exakt so liegen:
+   - `<HA_CONFIG>/custom_components/govee_h617e/manifest.json`
+2. **Nicht** nur in ein beliebiges Host-Verzeichnis kopieren, sondern in das echte HA-Config-Mount.
+
+Beispiel bei Home Assistant Container:
+- Container-intern ist der Pfad immer `/config/custom_components/govee_h617e`.
+- Auf dem Host ist `/config` genau das Verzeichnis, das beim Container als Volume gemountet wurde.
+
+3. Home Assistant vollständig neu starten.
+4. In den Logs prüfen, ob die Integration geladen wurde (siehe Debugging-Kapitel).
+
+### Wenn die Integration nicht bei „Integration hinzufügen“ erscheint
+Checkliste:
+1. Stimmt der Pfad wirklich? (`/config/custom_components/govee_h617e/manifest.json`)
+2. Ordnername exakt `govee_h617e` (klein geschrieben).
+3. Datei `manifest.json` ist gültiges JSON und enthält `config_flow: true`.
+4. Home Assistant wurde **neu gestartet** (nicht nur UI neu laden).
+5. In den Core-Logs nach `govee_h617e` suchen:
+   - Fehler wie „Error loading custom_components.govee_h617e" deuten auf Import-/Dependency-Problem hin.
+   - Fehler bei `bleak`-Installation deuten auf Python-Wheel-/Netzwerkproblem im Container hin.
+6. Bei HA Container sicherstellen, dass der Container Internet-Zugriff hat (für Requirement-Installation).
+7. Bei HACS prüfen, ob das Repo in HACS als **Integration** und nicht als Theme/Plugin eingetragen wurde.
 
 ## 6) Konfiguration
 ### Config Flow
