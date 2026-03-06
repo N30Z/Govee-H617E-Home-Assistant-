@@ -1,0 +1,36 @@
+set_segment_color:
+  name: Set segment color
+  description: Experimental segment color control for H617E.
+  fields:
+    entry_id:
+      required: true
+      selector:
+        text:
+    segment_index:
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 64
+          mode: box
+    rgb_color:
+      required: true
+      selector:
+        color_rgb:
+
+apply_scene_payload:
+  name: Apply scene payload
+  description: Send one raw BLE packet or a packet sequence.
+  fields:
+    entry_id:
+      required: true
+      selector:
+        text:
+    packet_hex:
+      required: false
+      selector:
+        text:
+    packet_sequence:
+      required: false
+      selector:
+        object:
