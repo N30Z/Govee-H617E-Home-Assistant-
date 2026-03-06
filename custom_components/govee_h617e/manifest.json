@@ -1,12 +1,21 @@
 {
   "domain": "govee_h617e",
-  "name": "Govee H617E LED Strip",
-  "codeowners": ["@N30Z"],
+  "name": "Govee H617E BLE",
+  "version": "0.1.1",
+  "documentation": "https://github.com/example/govee_h617e",
+  "issue_tracker": "https://github.com/example/govee_h617e/issues",
+  "codeowners": ["@custom"],
   "config_flow": true,
-  "documentation": "https://github.com/N30Z/Govee-H617E-Home-Assistant-",
-  "issue_tracker": "https://github.com/N30Z/Govee-H617E-Home-Assistant-/issues",
-  "iot_class": "local_push",
-  "requirements": ["bleak>=0.21.0"],
-  "version": "1.0.0",
-  "homeassistant": "2023.1.0"
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "after_dependencies": ["bluetooth"],
+  "bluetooth": [
+    {
+      "local_name": "H617E*"
+    },
+    {
+      "local_name": "Govee*"
+    }
+  ],
+  "requirements": ["bleak>=0.21.1"]
 }
