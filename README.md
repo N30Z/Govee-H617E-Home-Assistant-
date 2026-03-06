@@ -30,6 +30,17 @@ Direkte Bluetooth-Low-Energy (BLE) Steuerung des **Govee H617E** LED-Strips in H
 
 ## Installation
 
+### Via HACS (empfohlen / recommended)
+
+1. [HACS](https://hacs.xyz) in Home Assistant installiert haben.
+2. HACS öffnen → **„Custom repositories"** → URL `https://github.com/N30Z/Govee-H617E-Home-Assistant-` eingeben → Typ **„Integration"** wählen → **Hinzufügen**.
+3. In HACS nach **„Govee H617E"** suchen und **Installieren** klicken.
+4. Home Assistant neu starten.
+
+> **English:** Open HACS → *Custom repositories* → add `https://github.com/N30Z/Govee-H617E-Home-Assistant-` as type *Integration* → search for **Govee H617E** and install → restart Home Assistant.
+
+---
+
 ### Manuell (ohne HACS)
 
 1. Den Ordner `custom_components/govee_h617e/` aus diesem Repository in dein Home-Assistant-Konfigurationsverzeichnis kopieren:
